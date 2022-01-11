@@ -1,0 +1,70 @@
+package com.hdwang.exceltest.validate.validator;
+
+import cn.hutool.poi.excel.ExcelUtil;
+import cn.hutool.poi.excel.cell.CellLocation;
+import com.hdwang.exceltest.exceldata.CellData;
+import com.hdwang.exceltest.exceldata.ExcelData;
+import com.hdwang.exceltest.validate.ErrorCode;
+import com.hdwang.exceltest.validate.ValidateResult;
+
+import java.math.BigDecimal;
+
+/**
+ * 求和校验器
+ * 判断单元格的和值计算是否准确
+ */
+public class SumValidator implements Validator {
+
+    private String startLocationRef;
+    private String endLocationRef;
+
+    /**
+     * 待计算和值的所有单元格位置
+     *
+     * @param startLocationRef 起始单元格位置(起始与结束位置可以互换)
+     * @param endLocationRef   结束单元格位置(起始与结束位置可以互换)
+     */
+    public SumValidator(String startLocationRef, String endLocationRef) {
+        this.startLocationRef = startLocationRef;
+        this.endLocationRef = endLocationRef;
+    }
+
+    @Override
+    public ValidateResult validate(CellData cellData, ExcelData excelData) {
+        CellLocation startLocation = ExcelUtil.toLocation(startLocationRef);
+        CellLocation endLocation = ExcelUtil.toLocation(endLocationRef);
+        int startRowIndex = startLocation.getY();
+        int endRowIndex = endLocation.getY();
+        int startCellIndex = startLocation.getX();
+        int endCellIndex = endLocation.getX();
+        if (startLocation.getY() > endLocation.getY()) {
+            startRowIndex = endLocation.getY();
+            endRowIndex = startLocation.getY();
+        }
+        if (startLocation.getX() > endLocation.getX()) {
+            startCellIndex = endLocation.getX();
+            endCellIndex = startLocation.getX();
+        }
+        BigDecimal sum = new BigDecimal(0);
+        for (int r = startRowIndex; r <= endRowIndex; r++) {
+            for (int c = startCellIndex; c <= endCellIndex; c++) {
+                CellData data = excelData.getCellData(r, c);
+                String valueStr;
+                if (data != null) {
+                    //转成字符串精确计算小数等
+                    valueStr = data.getValue() == null ? "0" : String.valueOf(data.getValue());
+                    BigDecimal value = new BigDecimal(valueStr);
+                    sum = sum.add(value);
+                }
+            }
+        }
+        ValidateResult result = new ValidateResult();
+        result.setCellData(cellData);
+        String cellDataValue = cellData.getValue() == null ? "0" : String.valueOf(cellData.getValue());
+        if (!cellDataValue.equals(sum.toString())) {
+            result.setErrorCode(ErrorCode.CALCULATION_MISTAKE);
+            result.setMsg(result.getMsg() + ",实际计算结果：" + sum.toString());
+        }
+        return result;
+    }
+}
