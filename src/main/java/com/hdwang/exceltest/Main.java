@@ -23,8 +23,9 @@ public class Main {
             produceExcelByTemplate(templateFile, outputFile);
 
             long startTime = System.currentTimeMillis();
-            ExcelData<ZhenquanReport> reportExcelData = ExcelDataUtil.readExcelData(templateFile, 2, Integer.MAX_VALUE, 1, Integer.MAX_VALUE, ZhenquanReport.class);
+//            ExcelData<ZhenquanReport> reportExcelData = ExcelDataUtil.readExcelData(templateFile, 2, Integer.MAX_VALUE, 1, Integer.MAX_VALUE, ZhenquanReport.class);
 //            System.out.println(JSONUtil.toJsonStr(reportExcelData));
+            ExcelData<ZhenquanReport> reportExcelData = ExcelDataUtil.readExcelData(templateFile, 2, Integer.MAX_VALUE, "B", "E", ZhenquanReport.class);
             System.out.println(reportExcelData.getRowDataList());
             System.out.println(reportExcelData.getCellDataMap());
             System.out.println(reportExcelData.getBeanList());
@@ -32,7 +33,7 @@ public class Main {
             System.out.println("cost time:" + (System.currentTimeMillis() - startTime) + "ms");
 
             //指定行列范围内的所有单元格的非空校验
-            List<ValidateResult> results = ExcelValidateUtil.validate(reportExcelData, 2, 5, "C", "C", new NotNullValidator());
+            List<ValidateResult> results = ExcelValidateUtil.validate(reportExcelData, 2, 5, "B", "E", new NotNullValidator());
             System.out.println(results);
             //指定单元格的非空校验
             ValidateResult result = ExcelValidateUtil.validate(reportExcelData, 4, "E", new NotNullValidator());

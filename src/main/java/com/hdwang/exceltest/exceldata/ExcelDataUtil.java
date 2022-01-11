@@ -70,6 +70,22 @@ public class ExcelDataUtil {
     }
 
     /**
+     * 读取表格数据
+     *
+     * @param templateFile  文件
+     * @param startRowIndex 起始行号（从0开始）
+     * @param endRowIndex   结束行号（从0开始,包括此列）
+     * @param startCellName 起始列名（从A开始）
+     * @param endCellName   结束列名（从A开始,包括此列）
+     * @return 表格数据
+     */
+    public static <T> ExcelData<T> readExcelData(File templateFile, int startRowIndex, int endRowIndex, String startCellName, String endCellName, Class<T> tClass) {
+        int startCellIndex = ExcelUtil.colNameToIndex(startCellName + "0");
+        int endCellIndex = ExcelUtil.colNameToIndex(endCellName + "0");
+        return readExcelData(templateFile, startRowIndex, endRowIndex, startCellIndex, endCellIndex, tClass);
+    }
+
+    /**
      * 转换表格数据为Map结构，用于数据快速查找
      *
      * @param rowDataList 表格数据
