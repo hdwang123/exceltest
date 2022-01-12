@@ -4,8 +4,8 @@ import cn.hutool.poi.excel.ExcelReader;
 import cn.hutool.poi.excel.ExcelUtil;
 import cn.hutool.poi.excel.ExcelWriter;
 import com.hdwang.exceltest.exceldata.ExcelData;
-import com.hdwang.exceltest.exceldata.ExcelDataUtil;
-import com.hdwang.exceltest.validate.ExcelValidateUtil;
+import com.hdwang.exceltest.exceldata.ExcelDataReader;
+import com.hdwang.exceltest.validate.ExcelValidator;
 import com.hdwang.exceltest.validate.validator.NotNullValidator;
 import com.hdwang.exceltest.validate.ValidateResult;
 import com.hdwang.exceltest.validate.validator.SumValidator;
@@ -23,9 +23,9 @@ public class Main {
             produceExcelByTemplate(templateFile, outputFile);
 
             long startTime = System.currentTimeMillis();
-//            ExcelData<ZhenquanReport> reportExcelData = ExcelDataUtil.readExcelData(templateFile, 2, Integer.MAX_VALUE, 1, Integer.MAX_VALUE, ZhenquanReport.class);
+//            ExcelData<ZhenquanReport> reportExcelData = ExcelDataReader.readExcelData(templateFile, 2, Integer.MAX_VALUE, 1, Integer.MAX_VALUE, ZhenquanReport.class);
 //            System.out.println(JSONUtil.toJsonStr(reportExcelData));
-            ExcelData<ZhenquanReport> reportExcelData = ExcelDataUtil.readExcelData(templateFile, 2, Integer.MAX_VALUE, "B", "E", ZhenquanReport.class);
+            ExcelData<ZhenquanReport> reportExcelData = ExcelDataReader.readExcelData(templateFile, 2, Integer.MAX_VALUE, "B", "E", ZhenquanReport.class);
             System.out.println(reportExcelData.getRowDataList());
             System.out.println(reportExcelData.getCellDataMap());
             System.out.println(reportExcelData.getBeanList());
@@ -33,19 +33,19 @@ public class Main {
             System.out.println("cost time:" + (System.currentTimeMillis() - startTime) + "ms");
 
             //指定行列范围内的所有单元格的非空校验
-            List<ValidateResult> results = ExcelValidateUtil.validate(reportExcelData, 2, 5, "B", "E", new NotNullValidator());
+            List<ValidateResult> results = ExcelValidator.validate(reportExcelData, 2, 5, "B", "E", new NotNullValidator());
             System.out.println(results);
             //指定单元格的非空校验
-            ValidateResult result = ExcelValidateUtil.validate(reportExcelData, 4, "E", new NotNullValidator());
+            ValidateResult result = ExcelValidator.validate(reportExcelData, 4, "E", new NotNullValidator());
             System.out.println(result);
-            result = ExcelValidateUtil.validate(reportExcelData, "A5", new NotNullValidator());
+            result = ExcelValidator.validate(reportExcelData, "A5", new NotNullValidator());
             System.out.println(result);
             //指定单元格的求和校验
-            result = ExcelValidateUtil.validate(reportExcelData, "C7", new SumValidator("C3", "C6"));
+            result = ExcelValidator.validate(reportExcelData, "C7", new SumValidator("C3", "C6"));
             System.out.println(result);
-            result = ExcelValidateUtil.validate(reportExcelData, "F7", new SumValidator("F3", "F6"));
+            result = ExcelValidator.validate(reportExcelData, "F7", new SumValidator("F3", "F6"));
             System.out.println(result);
-            result = ExcelValidateUtil.validate(reportExcelData, "G5", new SumValidator("G3", "G4"));
+            result = ExcelValidator.validate(reportExcelData, "G5", new SumValidator("G3", "G4"));
             System.out.println(result);
 
         } catch (Exception ex) {

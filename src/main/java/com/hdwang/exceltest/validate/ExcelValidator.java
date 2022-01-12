@@ -12,7 +12,7 @@ import java.util.List;
 /**
  * 表格校验工具类
  */
-public class ExcelValidateUtil {
+public class ExcelValidator {
 
     /**
      * 校验行列范围内所有单元格

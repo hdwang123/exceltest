@@ -17,7 +17,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * 表格数据工具类
  */
-public class ExcelDataUtil {
+public class ExcelDataReader {
 
     /**
      * 读取表格数据
