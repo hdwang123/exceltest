@@ -25,7 +25,7 @@ public class Main {
             long startTime = System.currentTimeMillis();
 //            ExcelData<ZhenquanReport> reportExcelData = ExcelDataReader.readExcelData(templateFile, 2, Integer.MAX_VALUE, 1, Integer.MAX_VALUE, ZhenquanReport.class);
 //            System.out.println(JSONUtil.toJsonStr(reportExcelData));
-            ExcelData<ZhenquanReport> reportExcelData = ExcelDataReader.readExcelData(templateFile, 2, Integer.MAX_VALUE, "B", "E", ZhenquanReport.class);
+            ExcelData<ZhenquanReport> reportExcelData = ExcelDataReader.readExcelData(templateFile, 2, Integer.MAX_VALUE, "B", "G", ZhenquanReport.class);
             System.out.println(reportExcelData.getRowDataList());
             System.out.println(reportExcelData.getCellDataMap());
             System.out.println(reportExcelData.getBeanList());

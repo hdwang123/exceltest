@@ -60,8 +60,10 @@ public class SumValidator implements Validator {
         }
         ValidateResult result = new ValidateResult();
         result.setCellData(cellData);
-        String cellDataValue = cellData.getValue() == null ? "0" : String.valueOf(cellData.getValue());
-        if (!cellDataValue.equals(sum.toString())) {
+        //单元格数值全部转成字符串，然后再转换成double类型与和值作比较
+        String valueStr = String.valueOf(cellData.getValue() == null ? "0" : cellData.getValue());
+        double cellDataValue = Double.parseDouble(valueStr);
+        if (cellDataValue != sum.doubleValue()) {
             result.setErrorCode(ErrorCode.CALCULATION_MISTAKE);
             result.setMsg(result.getMsg() + ",实际计算结果：" + sum.toString());
         }
