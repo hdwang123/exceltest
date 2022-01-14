@@ -9,6 +9,7 @@ import com.hdwang.exceltest.validate.ExcelValidator;
 import com.hdwang.exceltest.validate.validator.EqualValidator;
 import com.hdwang.exceltest.validate.validator.NotNullValidator;
 import com.hdwang.exceltest.validate.ValidateResult;
+import com.hdwang.exceltest.validate.validator.RegexpValidator;
 import com.hdwang.exceltest.validate.validator.SumValidator;
 import org.apache.poi.ss.usermodel.*;
 
@@ -52,6 +53,9 @@ public class Main {
             result = ExcelValidator.validate(reportExcelData, "C7", new EqualValidator("3000"));
             System.out.println(result);
             result = ExcelValidator.validate(reportExcelData, "B6", new EqualValidator("净利"));
+            System.out.println(result);
+            //单元格格式校验（正则式校验）
+            result = ExcelValidator.validate(reportExcelData, "F4", new RegexpValidator("\\d+\\.\\d{2}", "格式不正确，请保留两位小数"));
             System.out.println(result);
         } catch (Exception ex) {
             ex.printStackTrace();
