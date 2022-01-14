@@ -6,6 +6,7 @@ import cn.hutool.poi.excel.ExcelWriter;
 import com.hdwang.exceltest.exceldata.ExcelData;
 import com.hdwang.exceltest.exceldata.ExcelDataReader;
 import com.hdwang.exceltest.validate.ExcelValidator;
+import com.hdwang.exceltest.validate.validator.EqualValidator;
 import com.hdwang.exceltest.validate.validator.NotNullValidator;
 import com.hdwang.exceltest.validate.ValidateResult;
 import com.hdwang.exceltest.validate.validator.SumValidator;
@@ -47,7 +48,11 @@ public class Main {
             System.out.println(result);
             result = ExcelValidator.validate(reportExcelData, "G5", new SumValidator("G3", "G4"));
             System.out.println(result);
-
+            //单元格等值校验
+            result = ExcelValidator.validate(reportExcelData, "C7", new EqualValidator("3000"));
+            System.out.println(result);
+            result = ExcelValidator.validate(reportExcelData, "B6", new EqualValidator("净利"));
+            System.out.println(result);
         } catch (Exception ex) {
             ex.printStackTrace();
         }

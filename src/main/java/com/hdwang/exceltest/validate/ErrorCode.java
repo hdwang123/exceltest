@@ -18,11 +18,14 @@ public enum ErrorCode {
      * 格式错误
      */
     FORMAT_ERROR(10002, "格式错误"),
-
+    /**
+     * 数值不等
+     */
+    NOT_EQUAL(10003, "数值不等"),
     /**
      * 计算错误
      */
-    CALCULATION_MISTAKE(10003, "计算错误");
+    CALCULATION_MISTAKE(10004, "计算错误");
 
 
     private int code;
