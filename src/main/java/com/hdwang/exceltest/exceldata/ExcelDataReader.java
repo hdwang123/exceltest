@@ -1,8 +1,10 @@
 package com.hdwang.exceltest.exceldata;
 
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.poi.excel.ExcelReader;
 import cn.hutool.poi.excel.ExcelUtil;
 import cn.hutool.poi.excel.cell.CellHandler;
+import cn.hutool.poi.excel.cell.CellLocation;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.poi.ss.usermodel.Cell;
 
@@ -19,18 +21,60 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class ExcelDataReader {
 
     /**
-     * 读取表格数据
+     * 读取表格指定行列范围内的数据,默认读取第一个sheet里的内容
+     *
+     * @param templateFile  文件
+     * @param startRowIndex 起始行号（从0开始）
+     * @param endRowIndex   结束行号（从0开始,包括此行）
+     * @param startCellName 起始列名（从A开始）
+     * @param endCellName   结束列名（从A开始,包括此列）
+     * @return 表格数据
+     */
+    public static ExcelData readExcelData(File templateFile, int startRowIndex, int endRowIndex, String startCellName, String endCellName) {
+        int startCellIndex = ExcelUtil.colNameToIndex(startCellName + "0");
+        int endCellIndex = ExcelUtil.colNameToIndex(endCellName + "0");
+        return readExcelData(templateFile, null, startRowIndex, endRowIndex, startCellIndex, endCellIndex);
+    }
+
+    /**
+     * 读取表格指定行列范围内的数据
+     *
+     * @param templateFile  文件
+     * @param sheetName     sheet名称
+     * @param startRowIndex 起始行号（从0开始）
+     * @param endRowIndex   结束行号（从0开始,包括此行）
+     * @param startCellName 起始列名（从A开始）
+     * @param endCellName   结束列名（从A开始,包括此列）
+     * @return 表格数据
+     */
+    public static ExcelData readExcelData(File templateFile, String sheetName, int startRowIndex, int endRowIndex, String startCellName, String endCellName) {
+        int startCellIndex = ExcelUtil.colNameToIndex(startCellName + "0");
+        int endCellIndex = ExcelUtil.colNameToIndex(endCellName + "0");
+        return readExcelData(templateFile, sheetName, startRowIndex, endRowIndex, startCellIndex, endCellIndex);
+    }
+
+
+    /**
+     * 读取指定行列范围的表格数据
      *
      * @param templateFile   文件
+     * @param sheetName      sheet名称
      * @param startRowIndex  起始行号（从0开始）
-     * @param endRowIndex    结束行号（从0开始,包括此列）
+     * @param endRowIndex    结束行号（从0开始,包括此行）
      * @param startCellIndex 起始列号（从0开始）
      * @param endCellIndex   结束列号（从0开始,包括此列）
      * @return 表格数据
      */
-    public static ExcelData readExcelData(File templateFile, int startRowIndex, int endRowIndex, int startCellIndex, int endCellIndex) {
+    private static ExcelData readExcelData(File templateFile, String sheetName, int startRowIndex, int endRowIndex, int startCellIndex, int endCellIndex) {
         ExcelData excelData = new ExcelData();
-        ExcelReader excelReader = ExcelUtil.getReader(templateFile, 0);
+        ExcelReader excelReader = null;
+        if (StrUtil.isBlank(sheetName)) {
+            //sheet名称为空，默认读取第一个sheet
+            excelReader = ExcelUtil.getReader(templateFile, 0);
+        } else {
+            //读取指定的sheet
+            excelReader = ExcelUtil.getReader(templateFile, sheetName);
+        }
         List<List<CellData>> rowDataList = new ArrayList<>();
         AtomicInteger rowIndex = new AtomicInteger(-1);
         //读取表格数据
@@ -66,21 +110,39 @@ public class ExcelDataReader {
         return excelData;
     }
 
+
     /**
-     * 读取表格数据
+     * 读取表格中指定单元格的数据
      *
-     * @param templateFile  文件
-     * @param startRowIndex 起始行号（从0开始）
-     * @param endRowIndex   结束行号（从0开始,包括此列）
-     * @param startCellName 起始列名（从A开始）
-     * @param endCellName   结束列名（从A开始,包括此列）
+     * @param templateFile 文件
+     * @param locationRef  单元格位置（例如：A1）
      * @return 表格数据
      */
-    public static ExcelData readExcelData(File templateFile, int startRowIndex, int endRowIndex, String startCellName, String endCellName) {
-        int startCellIndex = ExcelUtil.colNameToIndex(startCellName + "0");
-        int endCellIndex = ExcelUtil.colNameToIndex(endCellName + "0");
-        return readExcelData(templateFile, startRowIndex, endRowIndex, startCellIndex, endCellIndex);
+    public static Object readCellValue(File templateFile, String locationRef) {
+        return readCellValue(templateFile, null, locationRef);
     }
+
+    /**
+     * 读取表格中指定单元格的数据
+     *
+     * @param templateFile 文件
+     * @param sheetName    sheet名称
+     * @param locationRef  单元格位置（例如：A1）
+     * @return 表格数据
+     */
+    public static Object readCellValue(File templateFile, String sheetName, String locationRef) {
+        ExcelReader excelReader = null;
+        if (StrUtil.isBlank(sheetName)) {
+            //sheet名称为空，默认读取第一个sheet
+            excelReader = ExcelUtil.getReader(templateFile, 0);
+        } else {
+            //读取指定的sheet
+            excelReader = ExcelUtil.getReader(templateFile, sheetName);
+        }
+        CellLocation cellLocation = ExcelUtil.toLocation(locationRef);
+        return excelReader.readCellValue(cellLocation.getX(), cellLocation.getY());
+    }
+
 
     /**
      * 转换表格数据为Map结构，用于数据快速查找

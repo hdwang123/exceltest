@@ -27,14 +27,17 @@ public class Main {
 
             long startTime = System.currentTimeMillis();
             //读取指定行列范围内的数据
-//            ExcelData reportExcelData = ExcelDataReader.readExcelData(templateFile, 2, Integer.MAX_VALUE, 1, Integer.MAX_VALUE);
             ExcelData reportExcelData = ExcelDataReader.readExcelData(templateFile, 2, Integer.MAX_VALUE, "B", "G");
             System.out.println("rowDataList:" + reportExcelData.getRowDataList()); //获取行列表示的数据
             System.out.println("cellDataMap:" + reportExcelData.getCellDataMap()); //获取map表示的数据
             //转换为beanList
             System.out.println("beanList:" + reportExcelData.toBeanList(ZhenquanReport.class));
+            //从读取的数据中获取指定单元格数据
             System.out.println("C3:" + reportExcelData.getCellData(2, "C"));
             System.out.println("C3:" + reportExcelData.getCellData("C3"));
+            //直接读取Excel文件中某个单元格的数值
+            System.out.println("C3:" + ExcelDataReader.readCellValue(templateFile, "C3"));
+            System.out.println("测试2 B2:" + ExcelDataReader.readCellValue(templateFile,"测试2", "B2"));
             System.out.println("cost time:" + (System.currentTimeMillis() - startTime) + "ms");
 
             //指定行列范围内的所有单元格的非空校验
