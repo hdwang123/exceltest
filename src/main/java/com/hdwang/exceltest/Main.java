@@ -37,7 +37,7 @@ public class Main {
             System.out.println("C3:" + reportExcelData.getCellData("C3"));
             //直接读取Excel文件中某个单元格的数值
             System.out.println("C3:" + ExcelDataReader.readCellValue(templateFile, "C3"));
-            System.out.println("测试2 B2:" + ExcelDataReader.readCellValue(templateFile,"测试2", "B2"));
+            System.out.println("测试2 B2:" + ExcelDataReader.readCellValue(templateFile, "测试2", "B2"));
             System.out.println("cost time:" + (System.currentTimeMillis() - startTime) + "ms");
 
             //指定行列范围内的所有单元格的非空校验
