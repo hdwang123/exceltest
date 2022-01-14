@@ -63,6 +63,8 @@ public class Main {
             System.out.println("==================等值校验======================");
             result = ExcelValidator.validate(reportExcelData, "C7", new EqualValidator("3000"));
             System.out.println(result);
+            result = ExcelValidator.validate(reportExcelData, "F3", new EqualValidator("1.11"));
+            System.out.println(result);
             result = ExcelValidator.validate(reportExcelData, "B6", new EqualValidator("净利"));
             System.out.println(result);
             //单元格格式校验（正则式校验）

@@ -28,7 +28,7 @@ public class EqualValidator implements Validator {
         ValidateResult result = new ValidateResult();
         result.setCellData(cellData);
         String cellDataValue = cellData.getValue() == null ? StrUtil.EMPTY : String.valueOf(cellData.getValue());
-        if (StrUtil.isNumeric(cellDataValue)) {
+        if (isNumber(cellDataValue)) {
             //数值比较，转换为double类型进行比较
             if (Double.parseDouble(cellDataValue) != Double.parseDouble(this.value)) {
                 result.setErrorCode(ErrorCode.NOT_EQUAL);
@@ -43,5 +43,16 @@ public class EqualValidator implements Validator {
         }
 
         return result;
+    }
+
+    /**
+     * 判断字符串是否是数值类型(整型、浮点型)
+     *
+     * @param str 字符串
+     * @return 是否是数值类型
+     */
+    private static boolean isNumber(String str) {
+        String reg = "^-?[0-9]+(.[0-9]+)?$";
+        return str.matches(reg);
     }
 }
