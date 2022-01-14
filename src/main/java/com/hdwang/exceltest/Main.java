@@ -22,19 +22,23 @@ public class Main {
         try {
             File templateFile = new File("C:\\Users\\hdwang\\Desktop\\test.xlsx");
             File outputFile = new File("C:\\Users\\hdwang\\Desktop\\test2.xlsx");
+            //根据excel模板写值
             produceExcelByTemplate(templateFile, outputFile);
 
             long startTime = System.currentTimeMillis();
-//            ExcelData<ZhenquanReport> reportExcelData = ExcelDataReader.readExcelData(templateFile, 2, Integer.MAX_VALUE, 1, Integer.MAX_VALUE, ZhenquanReport.class);
-//            System.out.println(JSONUtil.toJsonStr(reportExcelData));
-            ExcelData<ZhenquanReport> reportExcelData = ExcelDataReader.readExcelData(templateFile, 2, Integer.MAX_VALUE, "B", "G", ZhenquanReport.class);
-            System.out.println(reportExcelData.getRowDataList());
-            System.out.println(reportExcelData.getCellDataMap());
-            System.out.println(reportExcelData.getBeanList());
-            System.out.println(reportExcelData.getCellData(2, "C"));
+            //读取指定行列范围内的数据
+//            ExcelData reportExcelData = ExcelDataReader.readExcelData(templateFile, 2, Integer.MAX_VALUE, 1, Integer.MAX_VALUE);
+            ExcelData reportExcelData = ExcelDataReader.readExcelData(templateFile, 2, Integer.MAX_VALUE, "B", "G");
+            System.out.println("rowDataList:" + reportExcelData.getRowDataList()); //获取行列表示的数据
+            System.out.println("cellDataMap:" + reportExcelData.getCellDataMap()); //获取map表示的数据
+            //转换为beanList
+            System.out.println("beanList:" + reportExcelData.toBeanList(ZhenquanReport.class));
+            System.out.println("C3:" + reportExcelData.getCellData(2, "C"));
+            System.out.println("C3:" + reportExcelData.getCellData("C3"));
             System.out.println("cost time:" + (System.currentTimeMillis() - startTime) + "ms");
 
             //指定行列范围内的所有单元格的非空校验
+            System.out.println("==================非空校验======================");
             List<ValidateResult> results = ExcelValidator.validate(reportExcelData, 2, 5, "B", "E", new NotNullValidator());
             System.out.println(results);
             //指定单元格的非空校验
@@ -43,6 +47,7 @@ public class Main {
             result = ExcelValidator.validate(reportExcelData, "A5", new NotNullValidator());
             System.out.println(result);
             //指定单元格的求和校验
+            System.out.println("==================求和校验======================");
             result = ExcelValidator.validate(reportExcelData, "C7", new SumValidator("C3", "C6"));
             System.out.println(result);
             result = ExcelValidator.validate(reportExcelData, "F7", new SumValidator("F3", "F6"));
@@ -50,11 +55,13 @@ public class Main {
             result = ExcelValidator.validate(reportExcelData, "G5", new SumValidator("G3", "G4"));
             System.out.println(result);
             //单元格等值校验
+            System.out.println("==================等值校验======================");
             result = ExcelValidator.validate(reportExcelData, "C7", new EqualValidator("3000"));
             System.out.println(result);
             result = ExcelValidator.validate(reportExcelData, "B6", new EqualValidator("净利"));
             System.out.println(result);
             //单元格格式校验（正则式校验）
+            System.out.println("==================格式校验======================");
             result = ExcelValidator.validate(reportExcelData, "F4", new RegexpValidator("\\d+\\.\\d{2}", "格式不正确，请保留两位小数"));
             System.out.println(result);
         } catch (Exception ex) {

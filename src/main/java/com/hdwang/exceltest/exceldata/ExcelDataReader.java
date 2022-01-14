@@ -7,7 +7,6 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.poi.ss.usermodel.Cell;
 
 import java.io.File;
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -29,8 +28,8 @@ public class ExcelDataReader {
      * @param endCellIndex   结束列号（从0开始,包括此列）
      * @return 表格数据
      */
-    public static <T> ExcelData<T> readExcelData(File templateFile, int startRowIndex, int endRowIndex, int startCellIndex, int endCellIndex, Class<T> tClass) {
-        ExcelData<T> excelData = new ExcelData<>();
+    public static ExcelData readExcelData(File templateFile, int startRowIndex, int endRowIndex, int startCellIndex, int endCellIndex) {
+        ExcelData excelData = new ExcelData();
         ExcelReader excelReader = ExcelUtil.getReader(templateFile, 0);
         List<List<CellData>> rowDataList = new ArrayList<>();
         AtomicInteger rowIndex = new AtomicInteger(-1);
@@ -64,8 +63,6 @@ public class ExcelDataReader {
         excelData.setRowDataList(rowDataList);
         //转换为Map结构
         excelData.setCellDataMap(convertExcelDataToMap(rowDataList));
-        //转为为bean结构
-        excelData.setBeanList(convertExcelDataToBeanList(rowDataList, tClass));
         return excelData;
     }
 
@@ -79,10 +76,10 @@ public class ExcelDataReader {
      * @param endCellName   结束列名（从A开始,包括此列）
      * @return 表格数据
      */
-    public static <T> ExcelData<T> readExcelData(File templateFile, int startRowIndex, int endRowIndex, String startCellName, String endCellName, Class<T> tClass) {
+    public static ExcelData readExcelData(File templateFile, int startRowIndex, int endRowIndex, String startCellName, String endCellName) {
         int startCellIndex = ExcelUtil.colNameToIndex(startCellName + "0");
         int endCellIndex = ExcelUtil.colNameToIndex(endCellName + "0");
-        return readExcelData(templateFile, startRowIndex, endRowIndex, startCellIndex, endCellIndex, tClass);
+        return readExcelData(templateFile, startRowIndex, endRowIndex, startCellIndex, endCellIndex);
     }
 
     /**
@@ -103,60 +100,6 @@ public class ExcelDataReader {
             }
         }
         return cellDataMap;
-    }
-
-
-    /**
-     * 转换表格数据为bean对象列表
-     *
-     * @param rowDataList 表格数据
-     * @param tClass      bean类型s
-     * @param <T>
-     * @return bean对象列表
-     */
-    private static <T> List<T> convertExcelDataToBeanList(List<List<CellData>> rowDataList, Class<T> tClass) {
-        if (CollectionUtils.isEmpty(rowDataList)) {
-            return new ArrayList<>();
-        }
-        List<T> beanList = new ArrayList<>();
-        for (List<CellData> rowData : rowDataList) {
-            try {
-                //实例化bean对象
-                T bean = tClass.newInstance();
-                //遍历字段并赋值
-                Field[] fields = tClass.getDeclaredFields();
-                for (Field field : fields) {
-                    if (field.isAnnotationPresent(ColIndex.class)) {
-                        ColIndex colIndex = field.getAnnotation(ColIndex.class);
-                        int index = colIndex.index();
-                        String name = colIndex.name();
-                        if (index != -1) {
-                            //do nothing
-                        } else if (!"".equals(name)) {
-                            //列名转索引号（补0为了适应下述方法）
-                            index = ExcelUtil.colNameToIndex(name + "0");
-                        } else {
-                            throw new RuntimeException("对象属性上的ColIndex注解必须设置值");
-                        }
-                        //从行数据中找到指定单元格数据给字段赋值
-                        final int i = index;
-                        CellData cellData = rowData.stream().filter(x -> x.getCellIndex() == i).findFirst().orElse(null);
-                        if (cellData != null) {
-                            Object value = cellData.getValue();
-                            if (field.getType().getName().equals(String.class.getName())) {
-                                value = String.valueOf(value);
-                            }
-                            field.setAccessible(true);
-                            field.set(bean, value);
-                        }
-                    }
-                }
-                beanList.add(bean);
-            } catch (Exception ex) {
-                throw new RuntimeException("实例化对象失败：" + ex.getMessage(), ex);
-            }
-        }
-        return beanList;
     }
 
 
