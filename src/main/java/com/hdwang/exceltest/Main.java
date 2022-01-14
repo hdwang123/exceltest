@@ -39,6 +39,8 @@ public class Main {
             System.out.println("C3:" + ExcelDataReader.readCellValue(templateFile, "C3"));
             System.out.println("测试2 B2:" + ExcelDataReader.readCellValue(templateFile, "测试2", "B2"));
             System.out.println("cost time:" + (System.currentTimeMillis() - startTime) + "ms");
+            //读取所有的sheet名称
+            System.out.println("sheetNames:" + ExcelDataReader.getSheetNames(templateFile));
 
             //指定行列范围内的所有单元格的非空校验
             System.out.println("==================非空校验======================");
