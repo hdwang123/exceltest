@@ -19,7 +19,7 @@ public class ExcelValidator {
      *
      * @param excelData      表格数据
      * @param startRowIndex  起始行号（从0开始）
-     * @param endRowIndex    结束行号（从0开始,包括此列）
+     * @param endRowIndex    结束行号（从0开始,包括此行）
      * @param startCellIndex 起始列号（从0开始）
      * @param endCellIndex   结束列号（从0开始,包括此列）
      * @param validators     校验器（可以多个）
@@ -53,7 +53,7 @@ public class ExcelValidator {
      *
      * @param excelData     表格数据
      * @param startRowIndex 起始行号（从0开始）
-     * @param endRowIndex   结束行号（从0开始,包括此列）
+     * @param endRowIndex   结束行号（从0开始,包括此行）
      * @param startCellName 起始列名（从A开始）
      * @param endCellName   结束列名（从A开始,包括此列）
      * @param validators    校验器（可以多个）
