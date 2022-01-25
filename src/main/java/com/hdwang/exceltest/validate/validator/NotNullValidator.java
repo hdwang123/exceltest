@@ -10,15 +10,12 @@ import com.hdwang.exceltest.validate.ValidateResult;
  * 非空校验器
  * 判断单元格的值是否为空
  */
-public class NotNullValidator implements Validator {
+public class NotNullValidator extends AbstractValidator {
 
     @Override
-    public ValidateResult validate(CellData cellData, ExcelData excelData) {
-        ValidateResult result = new ValidateResult();
-        result.setCellData(cellData);
+    public void validate(CellData cellData, ExcelData excelData, ValidateResult result) {
         if (cellData.getValue() == null || StrUtil.isBlank(String.valueOf(cellData.getValue()))) {
             result.setErrorCode(ErrorCode.DATA_EMPTY);
         }
-        return result;
     }
 }

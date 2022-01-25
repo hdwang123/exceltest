@@ -10,7 +10,7 @@ import com.hdwang.exceltest.validate.ValidateResult;
  * 正则式校验器
  * 校验单元格的值的格式是否匹配
  */
-public class RegexpValidator implements Validator {
+public class RegexpValidator extends AbstractValidator {
 
     private String regexp;
     private String errorMsg;
@@ -36,9 +36,7 @@ public class RegexpValidator implements Validator {
     }
 
     @Override
-    public ValidateResult validate(CellData cellData, ExcelData excelData) {
-        ValidateResult result = new ValidateResult();
-        result.setCellData(cellData);
+    public void validate(CellData cellData, ExcelData excelData, ValidateResult result) {
         String cellDataValue = cellData.getValue() == null ? StrUtil.EMPTY : String.valueOf(cellData.getValue());
         if (!cellDataValue.matches(regexp)) {
             result.setErrorCode(ErrorCode.FORMAT_ERROR);
@@ -46,6 +44,5 @@ public class RegexpValidator implements Validator {
                 result.setMsg(this.errorMsg);
             }
         }
-        return result;
     }
 }

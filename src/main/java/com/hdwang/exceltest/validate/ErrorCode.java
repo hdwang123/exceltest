@@ -25,7 +25,12 @@ public enum ErrorCode {
     /**
      * 计算错误
      */
-    CALCULATION_MISTAKE(10004, "计算错误");
+    CALCULATION_MISTAKE(10004, "计算错误"),
+
+    /**
+     * 校验失败（校验过程抛异常了）
+     */
+    VALIDATE_FAILED(-1, "校验失败");
 
 
     private int code;

@@ -10,9 +10,10 @@ import com.hdwang.exceltest.validate.ValidateResult;
  * 等值校验器
  * 判断单元格的值是否与某个值相等
  */
-public class EqualValidator implements Validator {
+public class EqualValidator extends AbstractValidator {
 
     private String value;
+    private String errorMsg;
 
     /**
      * 构造器
@@ -23,26 +24,39 @@ public class EqualValidator implements Validator {
         this.value = value;
     }
 
+    /**
+     * 构造器
+     *
+     * @param value    待比较的值
+     * @param errorMsg 错误提示消息
+     */
+    public EqualValidator(String value, String errorMsg) {
+        this.value = value;
+        this.errorMsg = errorMsg;
+    }
+
     @Override
-    public ValidateResult validate(CellData cellData, ExcelData excelData) {
-        ValidateResult result = new ValidateResult();
-        result.setCellData(cellData);
+    public void validate(CellData cellData, ExcelData excelData, ValidateResult result) {
         String cellDataValue = cellData.getValue() == null ? StrUtil.EMPTY : String.valueOf(cellData.getValue());
         if (isNumber(cellDataValue)) {
             //数值比较，转换为double类型进行比较
             if (Double.parseDouble(cellDataValue) != Double.parseDouble(this.value)) {
                 result.setErrorCode(ErrorCode.NOT_EQUAL);
                 result.setMsg(result.getMsg() + ",期望值：" + this.value);
+                if (StrUtil.isNotEmpty(errorMsg)) {
+                    result.setMsg(errorMsg);
+                }
             }
         } else {
             //非数值，按照字符串进行比较
             if (!cellDataValue.equals(this.value)) {
                 result.setErrorCode(ErrorCode.NOT_EQUAL);
                 result.setMsg(result.getMsg() + ",期望值：" + this.value);
+                if (StrUtil.isNotEmpty(errorMsg)) {
+                    result.setMsg(errorMsg);
+                }
             }
         }
-
-        return result;
     }
 
     /**

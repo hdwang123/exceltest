@@ -1,20 +1,21 @@
 package com.hdwang.exceltest;
 
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.poi.excel.ExcelReader;
 import cn.hutool.poi.excel.ExcelUtil;
 import cn.hutool.poi.excel.ExcelWriter;
+import com.hdwang.exceltest.exceldata.CellData;
 import com.hdwang.exceltest.exceldata.ExcelData;
 import com.hdwang.exceltest.exceldata.ExcelDataReader;
+import com.hdwang.exceltest.validate.ErrorCode;
 import com.hdwang.exceltest.validate.ExcelValidator;
-import com.hdwang.exceltest.validate.validator.EqualValidator;
-import com.hdwang.exceltest.validate.validator.NotNullValidator;
+import com.hdwang.exceltest.validate.validator.*;
 import com.hdwang.exceltest.validate.ValidateResult;
-import com.hdwang.exceltest.validate.validator.RegexpValidator;
-import com.hdwang.exceltest.validate.validator.SumValidator;
 import org.apache.poi.ss.usermodel.*;
 
 
 import java.io.File;
+import java.math.BigDecimal;
 import java.util.*;
 
 public class Main {
@@ -27,14 +28,14 @@ public class Main {
 
             long startTime = System.currentTimeMillis();
             //读取指定行列范围内的数据
-            ExcelData reportExcelData = ExcelDataReader.readExcelData(templateFile, 2, Integer.MAX_VALUE, "B", "G");
-            System.out.println("rowDataList:" + reportExcelData.getRowDataList()); //获取行列表示的数据
-            System.out.println("cellDataMap:" + reportExcelData.getCellDataMap()); //获取map表示的数据
+            ExcelData excelData = ExcelDataReader.readExcelData(templateFile, 2, Integer.MAX_VALUE, "B", "G");
+            System.out.println("rowDataList:" + excelData.getRowDataList()); //获取行列表示的数据
+            System.out.println("cellDataMap:" + excelData.getCellDataMap()); //获取map表示的数据
             //转换为beanList
-            System.out.println("beanList:" + reportExcelData.toBeanList(ZhenquanReport.class));
+            System.out.println("beanList:" + excelData.toBeanList(ZhenquanReport.class));
             //从读取的数据中获取指定单元格数据
-            System.out.println("C3:" + reportExcelData.getCellData(2, "C"));
-            System.out.println("C3:" + reportExcelData.getCellData("C3"));
+            System.out.println("C3:" + excelData.getCellData(2, "C"));
+            System.out.println("C3:" + excelData.getCellData("C3"));
             //直接读取Excel文件中某个单元格的数值
             System.out.println("C3:" + ExcelDataReader.readCellValue(templateFile, "C3"));
             System.out.println("测试2 B2:" + ExcelDataReader.readCellValue(templateFile, "测试2", "B2"));
@@ -44,33 +45,63 @@ public class Main {
 
             //指定行列范围内的所有单元格的非空校验
             System.out.println("==================非空校验======================");
-            List<ValidateResult> results = ExcelValidator.validate(reportExcelData, 2, 5, "B", "E", new NotNullValidator());
+            List<ValidateResult> results = ExcelValidator.validate(excelData, 2, 5, "B", "E", new NotNullValidator());
             System.out.println(results);
             //指定单元格的非空校验
-            ValidateResult result = ExcelValidator.validate(reportExcelData, 4, "E", new NotNullValidator());
+            ValidateResult result = ExcelValidator.validate(excelData, 4, "E", new NotNullValidator());
             System.out.println(result);
-            result = ExcelValidator.validate(reportExcelData, "A5", new NotNullValidator());
+            result = ExcelValidator.validate(excelData, "A5", new NotNullValidator());
             System.out.println(result);
             //指定单元格的求和校验
             System.out.println("==================求和校验======================");
-            result = ExcelValidator.validate(reportExcelData, "C7", new SumValidator("C3", "C6"));
+            result = ExcelValidator.validate(excelData, "C7", new SumValidator("C3", "C6"));
             System.out.println(result);
-            result = ExcelValidator.validate(reportExcelData, "F7", new SumValidator("F3", "F6"));
+            result = ExcelValidator.validate(excelData, "F7", new SumValidator("F3", "F6"));
             System.out.println(result);
-            result = ExcelValidator.validate(reportExcelData, "G5", new SumValidator("G3", "G4"));
+            result = ExcelValidator.validate(excelData, "G5", new SumValidator("G3", "G4"));
             System.out.println(result);
+
             //单元格等值校验
             System.out.println("==================等值校验======================");
-            result = ExcelValidator.validate(reportExcelData, "C7", new EqualValidator("3000"));
+            result = ExcelValidator.validate(excelData, "C7", new EqualValidator("3000"));
             System.out.println(result);
-            result = ExcelValidator.validate(reportExcelData, "F3", new EqualValidator("1.11"));
+            result = ExcelValidator.validate(excelData, "F3", new EqualValidator("1.11"));
             System.out.println(result);
-            result = ExcelValidator.validate(reportExcelData, "B6", new EqualValidator("净利"));
+            result = ExcelValidator.validate(excelData, "B6", new EqualValidator("净利"));
             System.out.println(result);
+
+            BigDecimal decimal1 = new BigDecimal("100");
+            BigDecimal decimal2 = new BigDecimal("700");
+            double calculateValue = decimal1.add(decimal2).doubleValue();
+            String errorMsg = "单元格C6的值与预期不符，应该是decimal1与decimal2的值之和：" + calculateValue;
+            result = ExcelValidator.validate(excelData, "C6", new EqualValidator(String.valueOf(calculateValue), errorMsg));
+            System.out.println(result);
+
             //单元格格式校验（正则式校验）
             System.out.println("==================格式校验======================");
-            result = ExcelValidator.validate(reportExcelData, "F4", new RegexpValidator("\\d+\\.\\d{2}", "格式不正确，请保留两位小数"));
+            result = ExcelValidator.validate(excelData, "F4", new RegexpValidator("\\d+\\.\\d{2}", "格式不正确，请保留两位小数"));
             System.out.println(result);
+
+            //自定义校验
+            System.out.println("==================自定义校验======================");
+            result = ExcelValidator.validate(excelData, "C6", new AbstractValidator() {
+                @Override
+                public void validate(CellData cellData, ExcelData excelData, ValidateResult result) {
+                    //其他单元额的值
+                    BigDecimal decimal1 = new BigDecimal("200");
+                    BigDecimal decimal2 = new BigDecimal("700");
+                    double calculateValue = decimal1.add(decimal2).doubleValue();
+                    //比较单元格的值是否等于其它单元格的值
+                    String valueStr = cellData.getValue() == null ? "" : String.valueOf(cellData.getValue());
+                    if (Double.parseDouble(valueStr) != calculateValue) {
+                        result.setErrorCode(ErrorCode.NOT_EQUAL);
+                        result.setMsg("单元格C6的值与预期不符，应该是decimal1与decimal2的值之和：" + calculateValue);
+                    }
+                }
+            });
+            System.out.println(result);
+
+
         } catch (Exception ex) {
             ex.printStackTrace();
         }

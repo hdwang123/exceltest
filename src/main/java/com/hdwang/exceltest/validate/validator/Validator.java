@@ -5,7 +5,7 @@ import com.hdwang.exceltest.exceldata.ExcelData;
 import com.hdwang.exceltest.validate.ValidateResult;
 
 /**
- * 校验器
+ * 校验器接口
  */
 public interface Validator {
 

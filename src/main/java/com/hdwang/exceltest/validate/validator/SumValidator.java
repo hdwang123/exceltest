@@ -1,5 +1,6 @@
 package com.hdwang.exceltest.validate.validator;
 
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.poi.excel.ExcelUtil;
 import cn.hutool.poi.excel.cell.CellLocation;
 import com.hdwang.exceltest.exceldata.CellData;
@@ -13,7 +14,7 @@ import java.math.BigDecimal;
  * 求和校验器
  * 判断单元格的和值计算是否准确
  */
-public class SumValidator implements Validator {
+public class SumValidator extends AbstractValidator {
 
     private String startLocationRef;
     private String endLocationRef;
@@ -30,7 +31,7 @@ public class SumValidator implements Validator {
     }
 
     @Override
-    public ValidateResult validate(CellData cellData, ExcelData excelData) {
+    public void validate(CellData cellData, ExcelData excelData, ValidateResult result) {
         CellLocation startLocation = ExcelUtil.toLocation(startLocationRef);
         CellLocation endLocation = ExcelUtil.toLocation(endLocationRef);
         int startRowIndex = startLocation.getY();
@@ -53,13 +54,14 @@ public class SumValidator implements Validator {
                 if (data != null) {
                     //转成字符串精确计算小数等
                     valueStr = data.getValue() == null ? "0" : String.valueOf(data.getValue());
+                    if (StrUtil.isBlank(valueStr)) {
+                        valueStr = "0";
+                    }
                     BigDecimal value = new BigDecimal(valueStr);
                     sum = sum.add(value);
                 }
             }
         }
-        ValidateResult result = new ValidateResult();
-        result.setCellData(cellData);
         //单元格数值全部转成字符串，然后再转换成double类型与和值作比较
         String valueStr = String.valueOf(cellData.getValue() == null ? "0" : cellData.getValue());
         double cellDataValue = Double.parseDouble(valueStr);
@@ -67,6 +69,5 @@ public class SumValidator implements Validator {
             result.setErrorCode(ErrorCode.CALCULATION_MISTAKE);
             result.setMsg(result.getMsg() + ",实际计算结果：" + sum.toString());
         }
-        return result;
     }
 }
