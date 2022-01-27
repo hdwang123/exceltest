@@ -72,15 +72,21 @@ public class ExcelDataReader {
      */
     public static Object readCellValue(File file, String sheetName, String locationRef) {
         ExcelReader excelReader = null;
-        if (StrUtil.isBlank(sheetName)) {
-            //sheet名称为空，默认读取第一个sheet
-            excelReader = ExcelUtil.getReader(file, 0);
-        } else {
-            //读取指定的sheet
-            excelReader = ExcelUtil.getReader(file, sheetName);
+        try {
+            if (StrUtil.isBlank(sheetName)) {
+                //sheet名称为空，默认读取第一个sheet
+                excelReader = ExcelUtil.getReader(file, 0);
+            } else {
+                //读取指定的sheet
+                excelReader = ExcelUtil.getReader(file, sheetName);
+            }
+            CellLocation cellLocation = ExcelUtil.toLocation(locationRef);
+            return excelReader.readCellValue(cellLocation.getX(), cellLocation.getY());
+        } finally {
+            if (excelReader != null) {
+                excelReader.close();
+            }
         }
-        CellLocation cellLocation = ExcelUtil.toLocation(locationRef);
-        return excelReader.readCellValue(cellLocation.getX(), cellLocation.getY());
     }
 
     /**
@@ -109,45 +115,51 @@ public class ExcelDataReader {
     private static ExcelData readExcelData(File file, String sheetName, int startRowIndex, int endRowIndex, int startCellIndex, int endCellIndex) {
         ExcelData excelData = new ExcelData();
         ExcelReader excelReader = null;
-        if (StrUtil.isBlank(sheetName)) {
-            //sheet名称为空，默认读取第一个sheet
-            excelReader = ExcelUtil.getReader(file, 0);
-        } else {
-            //读取指定的sheet
-            excelReader = ExcelUtil.getReader(file, sheetName);
-        }
-        List<List<CellData>> rowDataList = new ArrayList<>();
-        AtomicInteger rowIndex = new AtomicInteger(-1);
-        //读取表格数据
-        excelReader.read(startRowIndex, endRowIndex, new CellHandler() {
-            @Override
-            public void handle(Cell cell, Object value) {
-                if (cell == null) {
-                    //无单元格跳过
-                    return;
-                }
-                if (cell.getColumnIndex() < startCellIndex || cell.getColumnIndex() > endCellIndex) {
-                    //列号不在范围内跳过
-                    return;
-                }
-
-                //新行的数据
-                if (cell.getRowIndex() != rowIndex.get()) {
-                    rowDataList.add(new ArrayList<>());
-                }
-                rowIndex.set(cell.getRowIndex());
-                //取出新行数据对象存储单元格数据
-                List<CellData> cellDataList = rowDataList.get(rowDataList.size() - 1);
-                CellData cellData = new CellData();
-                cellData.setRowIndex(cell.getRowIndex());
-                cellData.setCellIndex(cell.getColumnIndex());
-                cellData.setValue(value);
-                cellDataList.add(cellData);
+        try {
+            if (StrUtil.isBlank(sheetName)) {
+                //sheet名称为空，默认读取第一个sheet
+                excelReader = ExcelUtil.getReader(file, 0);
+            } else {
+                //读取指定的sheet
+                excelReader = ExcelUtil.getReader(file, sheetName);
             }
-        });
-        excelData.setRowDataList(rowDataList);
-        //转换为Map结构
-        excelData.setCellDataMap(convertExcelDataToMap(rowDataList));
+            List<List<CellData>> rowDataList = new ArrayList<>();
+            AtomicInteger rowIndex = new AtomicInteger(-1);
+            //读取表格数据
+            excelReader.read(startRowIndex, endRowIndex, new CellHandler() {
+                @Override
+                public void handle(Cell cell, Object value) {
+                    if (cell == null) {
+                        //无单元格跳过
+                        return;
+                    }
+                    if (cell.getColumnIndex() < startCellIndex || cell.getColumnIndex() > endCellIndex) {
+                        //列号不在范围内跳过
+                        return;
+                    }
+
+                    //新行的数据
+                    if (cell.getRowIndex() != rowIndex.get()) {
+                        rowDataList.add(new ArrayList<>());
+                    }
+                    rowIndex.set(cell.getRowIndex());
+                    //取出新行数据对象存储单元格数据
+                    List<CellData> cellDataList = rowDataList.get(rowDataList.size() - 1);
+                    CellData cellData = new CellData();
+                    cellData.setRowIndex(cell.getRowIndex());
+                    cellData.setCellIndex(cell.getColumnIndex());
+                    cellData.setValue(value);
+                    cellDataList.add(cellData);
+                }
+            });
+            excelData.setRowDataList(rowDataList);
+            //转换为Map结构
+            excelData.setCellDataMap(convertExcelDataToMap(rowDataList));
+        } finally {
+            if (excelReader != null) {
+                excelReader.close();
+            }
+        }
         return excelData;
     }
 
