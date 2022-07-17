@@ -26,12 +26,12 @@ public class ExcelDataReader {
      * @param file          文件
      * @param startRowIndex 起始行号（从0开始）
      * @param endRowIndex   结束行号（从0开始,包括此行）
-     * @param startCellName 起始列名（从A开始）
-     * @param endCellName   结束列名（从A开始,包括此列）
+     * @param startColName 起始列名（从A开始）
+     * @param endColName   结束列名（从A开始,包括此列）
      * @return 表格数据
      */
-    public static ExcelData readExcelData(File file, int startRowIndex, int endRowIndex, String startCellName, String endCellName) {
-        return readExcelData(file, null, startRowIndex, endRowIndex, startCellName, endCellName);
+    public static ExcelData readExcelData(File file, int startRowIndex, int endRowIndex, String startColName, String endColName) {
+        return readExcelData(file, null, startRowIndex, endRowIndex, startColName, endColName);
     }
 
     /**
@@ -41,13 +41,13 @@ public class ExcelDataReader {
      * @param sheetName     sheet名称
      * @param startRowIndex 起始行号（从0开始）
      * @param endRowIndex   结束行号（从0开始,包括此行）
-     * @param startCellName 起始列名（从A开始）
-     * @param endCellName   结束列名（从A开始,包括此列）
+     * @param startColName 起始列名（从A开始）
+     * @param endColName   结束列名（从A开始,包括此列）
      * @return 表格数据
      */
-    public static ExcelData readExcelData(File file, String sheetName, int startRowIndex, int endRowIndex, String startCellName, String endCellName) {
-        int startCellIndex = ExcelUtil.colNameToIndex(startCellName + "0");
-        int endCellIndex = ExcelUtil.colNameToIndex(endCellName + "0");
+    public static ExcelData readExcelData(File file, String sheetName, int startRowIndex, int endRowIndex, String startColName, String endColName) {
+        int startCellIndex = ExcelUtil.colNameToIndex(startColName + "0");
+        int endCellIndex = ExcelUtil.colNameToIndex(endColName + "0");
         return readExcelData(file, sheetName, startRowIndex, endRowIndex, startCellIndex, endCellIndex);
     }
 
@@ -108,11 +108,11 @@ public class ExcelDataReader {
      * @param sheetName      sheet名称
      * @param startRowIndex  起始行号（从0开始）
      * @param endRowIndex    结束行号（从0开始,包括此行）
-     * @param startCellIndex 起始列号（从0开始）
-     * @param endCellIndex   结束列号（从0开始,包括此列）
+     * @param startColIndex 起始列号（从0开始）
+     * @param endColIndex   结束列号（从0开始,包括此列）
      * @return 表格数据
      */
-    private static ExcelData readExcelData(File file, String sheetName, int startRowIndex, int endRowIndex, int startCellIndex, int endCellIndex) {
+    private static ExcelData readExcelData(File file, String sheetName, int startRowIndex, int endRowIndex, int startColIndex, int endColIndex) {
         ExcelData excelData = new ExcelData();
         ExcelReader excelReader = null;
         try {
@@ -133,7 +133,7 @@ public class ExcelDataReader {
                         //无单元格跳过
                         return;
                     }
-                    if (cell.getColumnIndex() < startCellIndex || cell.getColumnIndex() > endCellIndex) {
+                    if (cell.getColumnIndex() < startColIndex || cell.getColumnIndex() > endColIndex) {
                         //列号不在范围内跳过
                         return;
                     }
