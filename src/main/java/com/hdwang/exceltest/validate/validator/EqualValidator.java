@@ -1,14 +1,21 @@
 package com.hdwang.exceltest.validate.validator;
 
 import cn.hutool.core.util.StrUtil;
-import com.hdwang.exceltest.exceldata.CellData;
-import com.hdwang.exceltest.exceldata.ExcelData;
+import com.hdwang.exceltest.model.CellData;
+import com.hdwang.exceltest.model.ExcelData;
+import com.hdwang.exceltest.util.NumberUtil;
 import com.hdwang.exceltest.validate.ErrorCode;
 import com.hdwang.exceltest.validate.ValidateResult;
+
+import java.math.BigDecimal;
+import java.util.function.Supplier;
 
 /**
  * 等值校验器
  * 判断单元格的值是否与某个值相等
+ *
+ * @author wanghuidong
+ * @date 2022/1/27 16:12
  */
 public class EqualValidator extends AbstractValidator {
 
@@ -35,12 +42,23 @@ public class EqualValidator extends AbstractValidator {
         this.errorMsg = errorMsg;
     }
 
+    /**
+     * 构造器
+     *
+     * @param valueSupplier 待比较值提供者
+     * @param errorMsg      错误提示消息
+     */
+    public EqualValidator(Supplier<String> valueSupplier, String errorMsg) {
+        this.value = valueSupplier.get();
+        this.errorMsg = errorMsg;
+    }
+
     @Override
     public void validate(CellData cellData, ExcelData excelData, ValidateResult result) {
         String cellDataValue = cellData.getValue() == null ? StrUtil.EMPTY : String.valueOf(cellData.getValue());
-        if (isNumber(cellDataValue)) {
-            //数值比较，转换为double类型进行比较
-            if (Double.parseDouble(cellDataValue) != Double.parseDouble(this.value)) {
+        if (NumberUtil.isNormalNumber(cellDataValue) && NumberUtil.isNormalNumber(this.value)) {
+            //数值比较，转换为BigDecimal类型进行比较
+            if (new BigDecimal(cellDataValue).compareTo(new BigDecimal(this.value)) != 0) {
                 result.setErrorCode(ErrorCode.NOT_EQUAL);
                 result.setMsg(result.getMsg() + ",期望值：" + this.value);
                 if (StrUtil.isNotEmpty(errorMsg)) {
@@ -59,14 +77,5 @@ public class EqualValidator extends AbstractValidator {
         }
     }
 
-    /**
-     * 判断字符串是否是数值类型(整型、浮点型)
-     *
-     * @param str 字符串
-     * @return 是否是数值类型
-     */
-    private static boolean isNumber(String str) {
-        String reg = "^-?[0-9]+(.[0-9]+)?$";
-        return str.matches(reg);
-    }
+
 }

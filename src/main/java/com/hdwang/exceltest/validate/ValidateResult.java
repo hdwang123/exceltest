@@ -1,10 +1,13 @@
 package com.hdwang.exceltest.validate;
 
 import cn.hutool.json.JSONUtil;
-import com.hdwang.exceltest.exceldata.CellData;
+import com.hdwang.exceltest.model.CellData;
 
 /**
  * 校验结果
+ *
+ * @author wanghuidong
+ * @date 2022/1/27 16:12
  */
 public class ValidateResult {
 

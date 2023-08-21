@@ -1,13 +1,17 @@
 package com.hdwang.exceltest.validate.validator;
 
-import com.hdwang.exceltest.exceldata.CellData;
-import com.hdwang.exceltest.exceldata.ExcelData;
+
+import com.hdwang.exceltest.model.CellData;
+import com.hdwang.exceltest.model.ExcelData;
 import com.hdwang.exceltest.validate.ErrorCode;
 import com.hdwang.exceltest.validate.ValidateResult;
 import lombok.extern.slf4j.Slf4j;
 
 /**
  * 校验器抽象类
+ *
+ * @author wanghuidong
+ * @date 2022/1/27 16:12
  */
 @Slf4j
 public abstract class AbstractValidator implements Validator {

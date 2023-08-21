@@ -1,9 +1,12 @@
-package com.hdwang.exceltest.exceldata;
+package com.hdwang.exceltest.model;
 
 import cn.hutool.json.JSONUtil;
 
 /**
  * 单元格数据
+ *
+ * @author wanghuidong
+ * @date 2022/1/27 16:12
  */
 public class CellData {
 

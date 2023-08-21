@@ -1,14 +1,13 @@
 package com.hdwang.exceltest;
 
-import cn.hutool.core.util.StrUtil;
 import cn.hutool.poi.excel.ExcelReader;
 import cn.hutool.poi.excel.ExcelUtil;
 import cn.hutool.poi.excel.ExcelWriter;
-import com.hdwang.exceltest.exceldata.CellData;
-import com.hdwang.exceltest.exceldata.ExcelData;
-import com.hdwang.exceltest.exceldata.ExcelDataReader;
+import com.hdwang.exceltest.model.CellData;
+import com.hdwang.exceltest.model.ExcelData;
+import com.hdwang.exceltest.util.ExcelDataReader;
+import com.hdwang.exceltest.util.ExcelValidator;
 import com.hdwang.exceltest.validate.ErrorCode;
-import com.hdwang.exceltest.validate.ExcelValidator;
 import com.hdwang.exceltest.validate.validator.*;
 import com.hdwang.exceltest.validate.ValidateResult;
 import org.apache.poi.ss.usermodel.*;
@@ -17,6 +16,7 @@ import org.apache.poi.ss.usermodel.*;
 import java.io.File;
 import java.math.BigDecimal;
 import java.util.*;
+
 
 public class Main {
     public static void main(String[] args) {
@@ -34,7 +34,7 @@ public class Main {
             //转换为beanList
             System.out.println("beanList:" + excelData.toBeanList(ZhenquanReport.class));
             //从读取的数据中获取指定单元格数据
-            System.out.println("C3:" + excelData.getCellData(2, "C"));
+            System.out.println("C3:" + excelData.getCellData(2, 2));
             System.out.println("C3:" + excelData.getCellData("C3"));
             //直接读取Excel文件中某个单元格的数值
             System.out.println("C3:" + ExcelDataReader.readCellValue(templateFile, "C3"));

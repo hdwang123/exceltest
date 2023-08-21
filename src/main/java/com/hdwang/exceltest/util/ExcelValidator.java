@@ -1,9 +1,11 @@
-package com.hdwang.exceltest.validate;
+package com.hdwang.exceltest.util;
 
 import cn.hutool.poi.excel.ExcelUtil;
 import cn.hutool.poi.excel.cell.CellLocation;
-import com.hdwang.exceltest.exceldata.CellData;
-import com.hdwang.exceltest.exceldata.ExcelData;
+import com.hdwang.exceltest.model.CellData;
+import com.hdwang.exceltest.model.ExcelData;
+import com.hdwang.exceltest.validate.ErrorCode;
+import com.hdwang.exceltest.validate.ValidateResult;
 import com.hdwang.exceltest.validate.validator.Validator;
 
 import java.util.ArrayList;
@@ -11,18 +13,21 @@ import java.util.List;
 
 /**
  * 表格校验工具类
+ *
+ * @author wanghuidong
+ * @date 2022/1/27 16:12
  */
 public class ExcelValidator {
 
     /**
      * 校验行列范围内所有单元格
      *
-     * @param excelData      表格数据
-     * @param startRowIndex  起始行号（从0开始）
-     * @param endRowIndex    结束行号（从0开始,包括此行）
+     * @param excelData     表格数据
+     * @param startRowIndex 起始行号（从0开始）
+     * @param endRowIndex   结束行号（从0开始,包括此行）
      * @param startColIndex 起始列号（从0开始）
      * @param endColIndex   结束列号（从0开始,包括此列）
-     * @param validators     校验器（可以多个）
+     * @param validators    校验器（可以多个）
      * @return 校验结果（仅返回校验失败的）
      */
     public static List<ValidateResult> validate(ExcelData excelData, int startRowIndex, int endRowIndex, int startColIndex, int endColIndex, Validator... validators) {
@@ -54,8 +59,8 @@ public class ExcelValidator {
      * @param excelData     表格数据
      * @param startRowIndex 起始行号（从0开始）
      * @param endRowIndex   结束行号（从0开始,包括此行）
-     * @param startColName 起始列名（从A开始）
-     * @param endColName   结束列名（从A开始,包括此列）
+     * @param startColName  起始列名（从A开始）
+     * @param endColName    结束列名（从A开始,包括此列）
      * @param validators    校验器（可以多个）
      * @return 校验结果（仅返回校验失败的）
      */

@@ -3,8 +3,8 @@ package com.hdwang.exceltest.validate.validator;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.poi.excel.ExcelUtil;
 import cn.hutool.poi.excel.cell.CellLocation;
-import com.hdwang.exceltest.exceldata.CellData;
-import com.hdwang.exceltest.exceldata.ExcelData;
+import com.hdwang.exceltest.model.CellData;
+import com.hdwang.exceltest.model.ExcelData;
 import com.hdwang.exceltest.validate.ErrorCode;
 import com.hdwang.exceltest.validate.ValidateResult;
 
@@ -13,6 +13,9 @@ import java.math.BigDecimal;
 /**
  * 求和校验器
  * 判断单元格的和值计算是否准确
+ *
+ * @author wanghuidong
+ * @date 2022/1/27 16:12
  */
 public class SumValidator extends AbstractValidator {
 
@@ -62,10 +65,10 @@ public class SumValidator extends AbstractValidator {
                 }
             }
         }
-        //单元格数值全部转成字符串，然后再转换成double类型与和值作比较
+        //单元格数值全部转成字符串，然后再转换成BigDecimal类型与和值作比较
         String valueStr = String.valueOf(cellData.getValue() == null ? "0" : cellData.getValue());
-        double cellDataValue = Double.parseDouble(valueStr);
-        if (cellDataValue != sum.doubleValue()) {
+        BigDecimal cellDataValue = new BigDecimal(valueStr);
+        if (cellDataValue.compareTo(sum) != 0) {
             result.setErrorCode(ErrorCode.CALCULATION_MISTAKE);
             result.setMsg(result.getMsg() + ",实际计算结果：" + sum.toString());
         }

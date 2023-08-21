@@ -2,6 +2,9 @@ package com.hdwang.exceltest.validate;
 
 /**
  * 校验错误码
+ *
+ * @author wanghuidong
+ * @date 2022/1/27 16:12
  */
 public enum ErrorCode {
 
@@ -26,6 +29,15 @@ public enum ErrorCode {
      * 计算错误
      */
     CALCULATION_MISTAKE(10004, "计算错误"),
+    /**
+     * 不在范围内
+     */
+    NOT_IN_RANGE(10005, "数值不在范围内"),
+
+    /**
+     * 增长幅度异常
+     */
+    INCREASE_ERROR(10006, "增长幅度异常"),
 
     /**
      * 校验失败（校验过程抛异常了）

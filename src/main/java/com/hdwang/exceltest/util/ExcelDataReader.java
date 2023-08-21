@@ -1,12 +1,15 @@
-package com.hdwang.exceltest.exceldata;
+package com.hdwang.exceltest.util;
 
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.poi.excel.ExcelReader;
 import cn.hutool.poi.excel.ExcelUtil;
 import cn.hutool.poi.excel.cell.CellHandler;
 import cn.hutool.poi.excel.cell.CellLocation;
+import com.hdwang.exceltest.model.CellData;
+import com.hdwang.exceltest.model.ExcelData;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellType;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -17,6 +20,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * 表格数据工具类
+ *
+ * @author wanghuidong
+ * @date 2022/1/27 16:12
  */
 public class ExcelDataReader {
 
@@ -26,8 +32,22 @@ public class ExcelDataReader {
      * @param file          文件
      * @param startRowIndex 起始行号（从0开始）
      * @param endRowIndex   结束行号（从0开始,包括此行）
-     * @param startColName 起始列名（从A开始）
-     * @param endColName   结束列名（从A开始,包括此列）
+     * @param startColIndex 起始列号（从0开始）
+     * @param endColIndex   结束列号（从0开始,包括此列）
+     * @return 表格数据
+     */
+    public static ExcelData readExcelData(File file, int startRowIndex, int endRowIndex, int startColIndex, int endColIndex) {
+        return readExcelData(file, null, startRowIndex, endRowIndex, startColIndex, endColIndex);
+    }
+
+    /**
+     * 读取表格指定行列范围内的数据,默认读取第一个sheet里的内容
+     *
+     * @param file          文件
+     * @param startRowIndex 起始行号（从0开始）
+     * @param endRowIndex   结束行号（从0开始,包括此行）
+     * @param startColName  起始列名（从A开始）
+     * @param endColName    结束列名（从A开始,包括此列）
      * @return 表格数据
      */
     public static ExcelData readExcelData(File file, int startRowIndex, int endRowIndex, String startColName, String endColName) {
@@ -41,14 +61,14 @@ public class ExcelDataReader {
      * @param sheetName     sheet名称
      * @param startRowIndex 起始行号（从0开始）
      * @param endRowIndex   结束行号（从0开始,包括此行）
-     * @param startColName 起始列名（从A开始）
-     * @param endColName   结束列名（从A开始,包括此列）
+     * @param startColName  起始列名（从A开始）
+     * @param endColName    结束列名（从A开始,包括此列）
      * @return 表格数据
      */
     public static ExcelData readExcelData(File file, String sheetName, int startRowIndex, int endRowIndex, String startColName, String endColName) {
-        int startCellIndex = ExcelUtil.colNameToIndex(startColName + "0");
-        int endCellIndex = ExcelUtil.colNameToIndex(endColName + "0");
-        return readExcelData(file, sheetName, startRowIndex, endRowIndex, startCellIndex, endCellIndex);
+        int startColIndex = ExcelUtil.colNameToIndex(startColName + "0");
+        int endColIndex = ExcelUtil.colNameToIndex(endColName + "0");
+        return readExcelData(file, sheetName, startRowIndex, endRowIndex, startColIndex, endColIndex);
     }
 
     /**
@@ -104,15 +124,15 @@ public class ExcelDataReader {
     /**
      * 读取指定行列范围的表格数据
      *
-     * @param file           文件
-     * @param sheetName      sheet名称
-     * @param startRowIndex  起始行号（从0开始）
-     * @param endRowIndex    结束行号（从0开始,包括此行）
+     * @param file          文件
+     * @param sheetName     sheet名称
+     * @param startRowIndex 起始行号（从0开始）
+     * @param endRowIndex   结束行号（从0开始,包括此行）
      * @param startColIndex 起始列号（从0开始）
      * @param endColIndex   结束列号（从0开始,包括此列）
      * @return 表格数据
      */
-    private static ExcelData readExcelData(File file, String sheetName, int startRowIndex, int endRowIndex, int startColIndex, int endColIndex) {
+    public static ExcelData readExcelData(File file, String sheetName, int startRowIndex, int endRowIndex, int startColIndex, int endColIndex) {
         ExcelData excelData = new ExcelData();
         ExcelReader excelReader = null;
         try {
@@ -136,6 +156,24 @@ public class ExcelDataReader {
                     if (cell.getColumnIndex() < startColIndex || cell.getColumnIndex() > endColIndex) {
                         //列号不在范围内跳过
                         return;
+                    }
+
+                    //值格式转换
+                    if (value != null) {
+                        String valueStr = value.toString();
+                        if (StrUtil.isNotBlank(valueStr)) {
+                            //格式转换
+                            if (isNumericPercent(cell)) {
+                                //数字格式的百分比：转成字符串存入数据库,否则存入小数无法直接判断出是否是百分号
+                                value = NumberUtil.decimalToPercent(valueStr);
+                            } else if (isStrPercent(cell, valueStr)) {
+                                //字符串格式的百分比：去掉逗号、空格等字符
+                                value = valueStr.replaceAll("[ ,%]", "") + "%";
+                            } else if (NumberUtil.isNumber(valueStr.replaceAll("[ ,]", ""))) {
+                                //数值类型转成原始数据格式（非科学计数法等）
+                                value = NumberUtil.toBigDecimal(valueStr.replaceAll("[ ,]", "")).toPlainString();
+                            }
+                        }
                     }
 
                     //新行的数据
@@ -181,6 +219,38 @@ public class ExcelDataReader {
             }
         }
         return cellDataMap;
+    }
+
+    /**
+     * 判断是否是数字百分比
+     *
+     * @param cell 单元格
+     * @return 是否是数字百分比
+     */
+    private static boolean isNumericPercent(Cell cell) {
+        if (cell.getCellType() == CellType.NUMERIC || cell.getCellType() == CellType.FORMULA) {
+            String dataFormatStr = cell.getCellStyle().getDataFormatString();
+            if (dataFormatStr != null && dataFormatStr.contains("%")) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * 判断是否是字符串百分比
+     *
+     * @param cell     单元格
+     * @param valueStr 值
+     * @return 是否是字符串百分比
+     */
+    private static boolean isStrPercent(Cell cell, String valueStr) {
+        if (cell.getCellType() == CellType.STRING) {
+            if (valueStr.contains("%") && NumberUtil.isNumber(valueStr.replaceAll("[ ,%]", ""))) {
+                return true;
+            }
+        }
+        return false;
     }
 
 }

@@ -1,7 +1,7 @@
 package com.hdwang.exceltest;
 
 import cn.hutool.json.JSONUtil;
-import com.hdwang.exceltest.exceldata.ColIndex;
+import com.hdwang.exceltest.model.ColIndex;
 
 /**
  * 证券月报
