@@ -59,8 +59,7 @@ public class PercentAbsRangeValidator extends AbstractValidator {
             cellDataValue = cellDataValue.replaceAll("[\\-,%]", "");
         }
         if (!NumberUtil.isNormalNumber(cellDataValue)) {
-            //这里做个简单的格式校验，最好用RegexpValidator做校验
-            result.setErrorCode(ErrorCode.FORMAT_ERROR);
+            //简单格式校验，不对就跳过校验，前提：已经用RegexpValidator做过格式校验了
             return;
         }
 
@@ -91,7 +90,7 @@ public class PercentAbsRangeValidator extends AbstractValidator {
         //校验失败,设置错误提示
         if (!validateOk) {
             result.setErrorCode(ErrorCode.NOT_IN_RANGE);
-            String errMsg = String.format("百分比绝对值的取值范围为：%s%s,%s%s",
+            String errMsg = String.format("百分比绝对值的取值范围为:%s%s,%s%s",
                     minInclusive ? "[" : "(",
                     minValue == null ? " " : minValue + "%",
                     maxValue == null ? " " : maxValue + "%",

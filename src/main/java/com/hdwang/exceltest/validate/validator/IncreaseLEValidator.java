@@ -7,8 +7,10 @@ import com.hdwang.exceltest.model.ExcelData;
 import com.hdwang.exceltest.validate.ErrorCode;
 import com.hdwang.exceltest.validate.ValidateResult;
 
+import java.math.BigDecimal;
+
 /**
- * 增长幅度校验器
+ * 增长幅度小于等于校验器
  * 判断单元格的值相较于另一个值的增长幅度是否小于等于某个值
  *
  * @author wanghuidong
@@ -22,9 +24,19 @@ public class IncreaseLEValidator extends AbstractValidator {
     private String compareVal;
 
     /**
-     * 增幅小于等于指定的值
+     * 负增幅小于等于指定的值
      */
-    private double leValue;
+    private Double negativeLeValue;
+
+    /**
+     * 增增幅小于等于指定的值
+     */
+    private Double positiveLeValue;
+
+    /**
+     * 增幅是否是率（默认：增幅是差值，true：增幅是增长率）
+     */
+    private boolean rate;
 
     /**
      * 错误提示
@@ -32,60 +44,66 @@ public class IncreaseLEValidator extends AbstractValidator {
     private String errorMsg;
 
     /**
-     * 是否是增长幅度的绝对值进行比较（是：允许正负增长，即变动幅度， 否：就是正增长）
-     */
-    private boolean abs;
-
-    /**
      * 增长幅度校验器
      *
-     * @param compareVal 待比较的值
-     * @param leValue    增幅小于等于指定的值
+     * @param compareVal      待比较的值
+     * @param negativeLeValue 负增幅小于等于指定的值
+     * @param positiveLeValue 正增幅小于等于指定的值
+     * @param rate            增幅是否是率（默认：增幅是差值，true：增幅是增长率）
      */
-    public IncreaseLEValidator(String compareVal, double leValue) {
-        this(compareVal, leValue, null);
+    public IncreaseLEValidator(String compareVal, double negativeLeValue, double positiveLeValue, boolean rate) {
+        this(compareVal, negativeLeValue, positiveLeValue, rate, null);
     }
 
     /**
      * 增长幅度校验器
      *
-     * @param compareVal 待比较的值
-     * @param leValue    增幅小于等于指定的值
-     * @param errorMsg   错误提示
+     * @param compareVal      待比较的值
+     * @param negativeLeValue 负增幅小于等于指定的值
+     * @param positiveLeValue 正增幅小于等于指定的值
+     * @param rate            增幅是否是率（默认：增幅是差值，true：增幅是增长率）
+     * @param errorMsg        错误提示
      */
-    public IncreaseLEValidator(String compareVal, double leValue, String errorMsg) {
-        this(compareVal, leValue, errorMsg, false);
-    }
-
-    /**
-     * 增长幅度校验器
-     *
-     * @param compareVal 待比较的值
-     * @param leValue    增幅小于等于指定的值
-     * @param errorMsg   错误提示
-     * @param abs        是否是增长幅度的绝对值进行比较（是：允许正负增长，即变动幅度， 否：就是正增长）
-     */
-    public IncreaseLEValidator(String compareVal, double leValue, String errorMsg, boolean abs) {
+    public IncreaseLEValidator(String compareVal, double negativeLeValue, double positiveLeValue, boolean rate, String errorMsg) {
         this.compareVal = compareVal;
-        this.leValue = leValue;
+        this.negativeLeValue = negativeLeValue;
+        this.positiveLeValue = positiveLeValue;
+        this.rate = rate;
         this.errorMsg = errorMsg;
-        this.abs = abs;
     }
 
     @Override
     public void validate(CellData cellData, ExcelData excelData, ValidateResult result) {
-        boolean validateOk = false;
+        boolean validateOk = true;
         String cellDataValue = cellData.getValue() == null ? StrUtil.EMPTY : String.valueOf(cellData.getValue());
         if (NumberUtil.isNumber(cellDataValue) && NumberUtil.isNumber(this.compareVal)) {
-            // 计算增长率
-            double increaseRate = NumberUtil.sub(NumberUtil.div(cellDataValue, this.compareVal), 1).doubleValue();
+            // 计算增长差值和增长率
+            BigDecimal increase = NumberUtil.sub(cellDataValue, this.compareVal);
+            double increaseRate = NumberUtil.div(increase, new BigDecimal(this.compareVal)).doubleValue();
             increaseRate = increaseRate * 100;
-            if (abs) {
-                increaseRate = Math.abs(increaseRate);
-            }
-            // 比较增长率
-            if (increaseRate <= leValue) {
-                validateOk = true;
+            if (rate) {
+                // 比较增长率
+                if (increaseRate < 0) {
+                    if (negativeLeValue != null && Math.abs(increaseRate) > Math.abs(negativeLeValue)) {
+                        validateOk = false;
+                    }
+                } else {
+                    if (positiveLeValue != null && increaseRate > positiveLeValue) {
+                        validateOk = false;
+                    }
+                }
+            } else {
+                // 比较增长差值
+                double increaseVal = increase.doubleValue();
+                if (increaseVal < 0) {
+                    if (negativeLeValue != null && Math.abs(increaseVal) > Math.abs(negativeLeValue)) {
+                        validateOk = false;
+                    }
+                } else {
+                    if (positiveLeValue != null && increaseVal > positiveLeValue) {
+                        validateOk = false;
+                    }
+                }
             }
         } else {
             // 数据格式都不对，直接跳过校验

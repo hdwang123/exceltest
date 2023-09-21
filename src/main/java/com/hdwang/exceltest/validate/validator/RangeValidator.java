@@ -6,7 +6,6 @@ import com.hdwang.exceltest.model.ExcelData;
 import com.hdwang.exceltest.util.NumberUtil;
 import com.hdwang.exceltest.validate.ErrorCode;
 import com.hdwang.exceltest.validate.ValidateResult;
-
 /**
  * 范围校验器
  * 判断单元格的值是否在某个范围内
@@ -79,8 +78,7 @@ public class RangeValidator extends AbstractValidator {
             return;
         }
         if (!NumberUtil.isNormalNumber(cellDataValue)) {
-            //这里做个简单的格式校验，最好用RegexpValidator做校验
-            result.setErrorCode(ErrorCode.FORMAT_ERROR);
+            //简单格式校验，不对就跳过校验，前提：已经用RegexpValidator做过格式校验了
             return;
         }
 
@@ -114,7 +112,7 @@ public class RangeValidator extends AbstractValidator {
             if (StrUtil.isNotBlank(errorMsg)) {
                 result.setMsg(errorMsg);
             } else {
-                String errMsg = String.format("%s,取值范围：%s%s,%s%s",
+                String errMsg = String.format("%s,取值范围:%s%s,%s%s",
                         result.getMsg(),
                         minInclusive ? "[" : "(",
                         minValue == null ? " " : minValue,
