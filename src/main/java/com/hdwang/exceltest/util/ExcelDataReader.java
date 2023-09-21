@@ -9,13 +9,12 @@ import com.hdwang.exceltest.model.CellData;
 import com.hdwang.exceltest.model.ExcelData;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.usermodel.DateUtil;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -160,7 +159,7 @@ public class ExcelDataReader {
 
                     //值格式转换
                     if (value != null) {
-                        String valueStr = value.toString();
+                        String valueStr = value.toString().trim();
                         if (StrUtil.isNotBlank(valueStr)) {
                             //格式转换
                             if (isNumericPercent(cell)) {
@@ -168,10 +167,14 @@ public class ExcelDataReader {
                                 value = NumberUtil.decimalToPercent(valueStr);
                             } else if (isStrPercent(cell, valueStr)) {
                                 //字符串格式的百分比：去掉逗号、空格等字符
-                                value = valueStr.replaceAll("[ ,%]", "") + "%";
-                            } else if (NumberUtil.isNumber(valueStr.replaceAll("[ ,]", ""))) {
+                                value = valueStr.replaceAll("[,%]", "") + "%";
+                            } else if (NumberUtil.isNumber(valueStr.replaceAll("[,]", ""))) {
                                 //数值类型转成原始数据格式（非科学计数法等）
-                                value = NumberUtil.toBigDecimal(valueStr.replaceAll("[ ,]", "")).toPlainString();
+                                value = NumberUtil.toBigDecimal(valueStr.replaceAll("[,]", "")).toPlainString();
+                            } else if (isFormattedDate(cell)) {
+                                //日期格式转换成字符串
+                                String format = ExcelDateUtil.getJavaDateFormat(cell.getCellStyle().getDataFormatString());
+                                value = cn.hutool.core.date.DateUtil.format((Date) value, format);
                             }
                         }
                     }
@@ -199,6 +202,22 @@ public class ExcelDataReader {
             }
         }
         return excelData;
+    }
+
+    /**
+     * 是否是格式化日期字符串
+     *
+     * @param cell 单元格
+     * @return
+     */
+    private static boolean isFormattedDate(Cell cell) {
+        if (cell.getCellType() == CellType.NUMERIC && DateUtil.isCellDateFormatted(cell)) {
+            CellStyle cellStyle = cell.getCellStyle();
+            if (cellStyle != null) {
+                return StrUtil.isNotBlank(cellStyle.getDataFormatString());
+            }
+        }
+        return false;
     }
 
     /**
@@ -246,7 +265,7 @@ public class ExcelDataReader {
      */
     private static boolean isStrPercent(Cell cell, String valueStr) {
         if (cell.getCellType() == CellType.STRING) {
-            if (valueStr.contains("%") && NumberUtil.isNumber(valueStr.replaceAll("[ ,%]", ""))) {
+            if (valueStr.contains("%") && NumberUtil.isNumber(valueStr.replaceAll("[,%]", ""))) {
                 return true;
             }
         }
