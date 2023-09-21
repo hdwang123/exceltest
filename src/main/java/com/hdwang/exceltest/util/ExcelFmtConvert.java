@@ -38,10 +38,10 @@ public class ExcelFmtConvert {
                 for (int j = 0; j <= oldSheet.getLastRowNum(); j++) {
                     HSSFRow oldRow = oldSheet.getRow(j);
                     XSSFRow newRow = newSheet.createRow(j);
-                    // 复制行高
-                    newRow.setHeight(oldRow.getHeight());
-
                     if (oldRow != null) {
+                        // 复制行高
+                        newRow.setHeight(oldRow.getHeight());
+
                         //遍历列，复制单元格
                         for (int k = 0; k < oldRow.getLastCellNum(); k++) {
                             HSSFCell oldCell = oldRow.getCell(k);
