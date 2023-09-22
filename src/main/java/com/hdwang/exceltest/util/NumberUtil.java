@@ -1,5 +1,7 @@
 package com.hdwang.exceltest.util;
 
+import cn.hutool.core.util.StrUtil;
+
 import java.math.BigDecimal;
 
 /**
@@ -41,6 +43,9 @@ public class NumberUtil extends cn.hutool.core.util.NumberUtil {
      * @return 是否是常规数字
      */
     public static boolean isNormalNumber(String str) {
+        if (StrUtil.isBlank(str)) {
+            return false;
+        }
         String reg = "^-?[0-9]+(\\.[0-9]+)?$";
         return str.matches(reg);
     }
