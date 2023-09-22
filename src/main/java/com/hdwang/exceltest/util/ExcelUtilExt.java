@@ -140,7 +140,7 @@ public class ExcelUtilExt {
                     reader.close();
                 }
             } catch (Exception ex) {
-                log.error("关闭ExcelWriter异常：", ex);
+                log.error("关闭ExcelReader异常：", ex);
             }
         }
         return propertyValue;
