@@ -18,8 +18,8 @@ import java.util.*;
 public class ExcelWriteByTemplate {
 
     public static void main(String[] args) {
-        String filePath = "src/main/resources/tmp1.xlsx";
-        String targetFilePath = "src/main/resources/target_tmp1.xlsx";
+        String filePath = "src/main/resources/tmp1.xls";
+        String targetFilePath = "src/main/resources/target_tmp1.xls";
         Workbook workbook = read(filePath);
         Sheet sheet = workbook.getSheetAt(0);
 
@@ -61,6 +61,7 @@ public class ExcelWriteByTemplate {
         int endRow = sheet.getLastRowNum();
         int rowCount = dataList.size();
 
+        // 读取占位行的格式
         Row startRow = sheet.getRow(startRowIndex);
         if (startRow == null) {
             startRow = sheet.createRow(startRowIndex);
@@ -79,7 +80,7 @@ public class ExcelWriteByTemplate {
         // 创建行
         int dataIndex = 0;
         for (int rowIndex = startRowIndex; rowIndex < startRowIndex + rowCount; rowIndex++, dataIndex++) {
-            // 读取占位行
+            // 读取占位行或创建行
             Row row = null;
             if (rowIndex == startRowIndex) {
                 row = sheet.getRow(rowIndex);
@@ -121,7 +122,7 @@ public class ExcelWriteByTemplate {
             OutputStream outputStream = new FileOutputStream(targetFilePath);
             workbook.write(outputStream);
         } catch (Exception ex) {
-            ex.printStackTrace();
+            throw new RuntimeException("输出文件异常", ex);
         }
     }
 
@@ -143,9 +144,8 @@ public class ExcelWriteByTemplate {
             }
             return workbook;
         } catch (Exception ex) {
-            ex.printStackTrace();
+            throw new RuntimeException("读取文件异常", ex);
         }
-        return null;
     }
 
 
