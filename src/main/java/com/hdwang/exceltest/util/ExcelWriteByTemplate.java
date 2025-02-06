@@ -62,6 +62,9 @@ public class ExcelWriteByTemplate {
         int rowCount = dataList.size();
 
         Row startRow = sheet.getRow(startRowIndex);
+        if (startRow == null) {
+            startRow = sheet.createRow(startRowIndex);
+        }
         CellStyle rowStyle = startRow.getRowStyle();
         List<Cell> cells = new ArrayList<>();
         for (Cell cell : startRow) {
@@ -69,7 +72,7 @@ public class ExcelWriteByTemplate {
         }
 
         // 起始行小于等于最后行，是插入，需要移动后续行
-        if (startRowIndex <= endRow) {
+        if (startRowIndex < endRow) {
             // 移动后续行
             sheet.shiftRows(startRowIndex + 1, endRow, rowCount - 1);
         }
@@ -80,24 +83,37 @@ public class ExcelWriteByTemplate {
             Row row = null;
             if (rowIndex == startRowIndex) {
                 row = sheet.getRow(rowIndex);
-            } else {
-                //创建行
-                row = sheet.createRow(rowIndex);
-                row.setRowStyle(rowStyle);
-                //创建列
-                for (Cell cell : cells) {
-                    row.createCell(cell.getColumnIndex()).setCellStyle(cell.getCellStyle());
+                if (row == null) {
+                    row = createRow(sheet, rowStyle, cells, rowIndex);
                 }
+            } else {
+                row = createRow(sheet, rowStyle, cells, rowIndex);
             }
 
             //赋值
             List<String> rowData = dataList.get(dataIndex);
             int cellIndex = startCellIndex;
             for (String cellVal : rowData) {
-                row.getCell(cellIndex).setCellValue(cellVal);
+                Cell cell = row.getCell(cellIndex);
+                if (cell == null) {
+                    cell = row.createCell(cellIndex);
+                }
+                cell.setCellValue(cellVal);
                 cellIndex++;
             }
         }
+    }
+
+    private static Row createRow(Sheet sheet, CellStyle rowStyle, List<Cell> cells, int rowIndex) {
+        Row row;
+        //创建行
+        row = sheet.createRow(rowIndex);
+        row.setRowStyle(rowStyle);
+        //创建列
+        for (Cell cell : cells) {
+            row.createCell(cell.getColumnIndex()).setCellStyle(cell.getCellStyle());
+        }
+        return row;
     }
 
     private static void writeFile(String targetFilePath, Workbook workbook) {
