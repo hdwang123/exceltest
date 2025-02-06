@@ -1,7 +1,5 @@
-package com.hdwang.exceltest.util;
+package com.hdwang.exceltest.template;
 
-import cn.hutool.core.util.ReUtil;
-import cn.hutool.poi.excel.cell.CellLocation;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -27,6 +25,7 @@ public class ExcelWriteByTemplate {
         Map<String, String> params = new HashMap<>();
         params.put("{age}", "30");
         params.put("{name}", "张三");
+        params.put("{ageTotal}", "100");
         replaceByParam(sheet, params);
 
         //位置替换
@@ -45,16 +44,94 @@ public class ExcelWriteByTemplate {
         dataList.add(Arrays.asList("小七", "20", "男", "杭州人", "爱好"));
         insertRows(sheet, startLocation, dataList);
 
-        //参数替换
-        params = new HashMap<>();
-        params.put("{ageTotal}", "100");
-        replaceByParam(sheet, params);
-
         //输出新文件
         writeFile(targetFilePath, workbook);
     }
 
-    private static void insertRows(Sheet sheet, String startLocation, List<List<String>> dataList) {
+    /**
+     * 读取Excel文件
+     *
+     * @param filePath 文件路径
+     * @return 工作簿
+     */
+    public static Workbook read(String filePath) {
+        try {
+            // 读取Excel模板文件
+            InputStream file = new FileInputStream(filePath);
+            Workbook workbook = null;
+            if (filePath.endsWith(".xlsx")) {
+                workbook = new XSSFWorkbook(file);
+            } else {
+                workbook = new HSSFWorkbook(file);
+            }
+            return workbook;
+        } catch (Exception ex) {
+            throw new RuntimeException("读取文件异常", ex);
+        }
+    }
+    
+    /**
+     * 使用参数替换
+     *
+     * @param sheet  工作表
+     * @param params 参数，格式：{"{age}":"30","{name}":"张三"}
+     */
+    public static void replaceByParam(Sheet sheet, Map<String, String> params) {
+        for (Row row : sheet) {
+            for (Cell cell : row) {
+                if (cell.getCellType() == CellType.STRING) {
+                    String cellValue = cell.getStringCellValue();
+                    // 检查是否包含占位符，如 {age}
+                    if (params.containsKey(cellValue)) {
+                        cell.setCellValue(params.get(cellValue));
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * 使用位置替换
+     *
+     * @param sheet          工作表
+     * @param locationValues 位置值，格式：{ "A1":"20","B2":"张三"}
+     */
+    public static void replaceByLocation(Sheet sheet, Map<String, String> locationValues) {
+        locationValues.forEach((location, value) -> {
+            CellLocation cellLocation = toLocation(location);
+            Row row = sheet.getRow(cellLocation.getY());
+            if (row != null) {
+                Cell cell = row.getCell(cellLocation.getX());
+                if (cell != null) {
+                    cell.setCellValue(value);
+                }
+            }
+        });
+    }
+
+    /**
+     * 输出Excel文件
+     *
+     * @param targetFilePath 目标文件路径
+     * @param workbook       工作簿
+     */
+    public static void writeFile(String targetFilePath, Workbook workbook) {
+        try {
+            OutputStream outputStream = new FileOutputStream(targetFilePath);
+            workbook.write(outputStream);
+        } catch (Exception ex) {
+            throw new RuntimeException("输出文件异常", ex);
+        }
+    }
+
+    /**
+     * 插入行,从指定位置开始插入数据，保留原占位行的格式
+     *
+     * @param sheet         工作表
+     * @param startLocation 起始单元格
+     * @param dataList      数据列表
+     */
+    public static void insertRows(Sheet sheet, String startLocation, List<List<String>> dataList) {
         CellLocation cellLocation = toLocation(startLocation);
         int startRowIndex = cellLocation.getY();
         int startCellIndex = cellLocation.getX();
@@ -105,10 +182,18 @@ public class ExcelWriteByTemplate {
         }
     }
 
+    /**
+     * 创建行
+     *
+     * @param sheet    工作表
+     * @param rowStyle 行样式
+     * @param cells    单元格列表
+     * @param rowIndex 行号
+     * @return 行
+     */
     private static Row createRow(Sheet sheet, CellStyle rowStyle, List<Cell> cells, int rowIndex) {
-        Row row;
         //创建行
-        row = sheet.createRow(rowIndex);
+        Row row = sheet.createRow(rowIndex);
         row.setRowStyle(rowStyle);
         //创建列
         for (Cell cell : cells) {
@@ -116,78 +201,6 @@ public class ExcelWriteByTemplate {
         }
         return row;
     }
-
-    private static void writeFile(String targetFilePath, Workbook workbook) {
-        try {
-            OutputStream outputStream = new FileOutputStream(targetFilePath);
-            workbook.write(outputStream);
-        } catch (Exception ex) {
-            throw new RuntimeException("输出文件异常", ex);
-        }
-    }
-
-    /**
-     * 读取Excel文件
-     *
-     * @param filePath 文件路径
-     * @return 工作簿
-     */
-    public static Workbook read(String filePath) {
-        try {
-            // 读取Excel模板文件
-            InputStream file = new FileInputStream(filePath);
-            Workbook workbook = null;
-            if (filePath.endsWith(".xlsx")) {
-                workbook = new XSSFWorkbook(file);
-            } else {
-                workbook = new HSSFWorkbook(file);
-            }
-            return workbook;
-        } catch (Exception ex) {
-            throw new RuntimeException("读取文件异常", ex);
-        }
-    }
-
-
-    /**
-     * 使用参数替换
-     *
-     * @param sheet  工作表
-     * @param params 参数，格式：{"{age}":"30","{name}":"张三"}
-     */
-    public static void replaceByParam(Sheet sheet, Map<String, String> params) {
-        for (Row row : sheet) {
-            for (Cell cell : row) {
-                if (cell.getCellType() == CellType.STRING) {
-                    String cellValue = cell.getStringCellValue();
-                    // 检查是否包含占位符，如 {age}
-                    if (params.containsKey(cellValue)) {
-                        cell.setCellValue(params.get(cellValue));
-                    }
-                }
-            }
-        }
-    }
-
-    /**
-     * 使用位置替换
-     *
-     * @param sheet          工作表
-     * @param locationValues 位置值，格式：{ "A1":"20","B2":"张三"}
-     */
-    public static void replaceByLocation(Sheet sheet, Map<String, String> locationValues) {
-        locationValues.forEach((location, value) -> {
-            CellLocation cellLocation = toLocation(location);
-            Row row = sheet.getRow(cellLocation.getY());
-            if (row != null) {
-                Cell cell = row.getCell(cellLocation.getX());
-                if (cell != null) {
-                    cell.setCellValue(value);
-                }
-            }
-        });
-    }
-
 
     /**
      * 将Excel中地址标识符（例如A11，B5）等转换为行列表示<br>
@@ -197,9 +210,9 @@ public class ExcelWriteByTemplate {
      * @return 坐标点，x表示列号，从0开始，y表示行号，从0开始
      * @since 5.1.4
      */
-    public static CellLocation toLocation(String locationRef) {
+    private static CellLocation toLocation(String locationRef) {
         final int x = colNameToIndex(locationRef);
-        final int y = ReUtil.getFirstNumber(locationRef) - 1;
+        final int y = Integer.parseInt(locationRef.replaceAll("[^0-9]", "")) - 1;
         return new CellLocation(x, y);
     }
 
@@ -210,7 +223,7 @@ public class ExcelWriteByTemplate {
      * @return A1-》0; B1-》1...AA1-》26
      * @since 4.1.20
      */
-    public static int colNameToIndex(String colName) {
+    private static int colNameToIndex(String colName) {
         int length = colName.length();
         char c;
         int index = -1;
