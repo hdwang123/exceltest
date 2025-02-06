@@ -55,9 +55,8 @@ public class ExcelWriteByTemplate {
      * @return 工作簿
      */
     public static Workbook read(String filePath) {
-        try {
-            // 读取Excel模板文件
-            InputStream file = new FileInputStream(filePath);
+        // 读取Excel模板文件
+        try (InputStream file = new FileInputStream(filePath);) {
             Workbook workbook = null;
             if (filePath.endsWith(".xlsx")) {
                 workbook = new XSSFWorkbook(file);
@@ -69,7 +68,7 @@ public class ExcelWriteByTemplate {
             throw new RuntimeException("读取文件异常", ex);
         }
     }
-    
+
     /**
      * 使用参数替换
      *
@@ -116,8 +115,7 @@ public class ExcelWriteByTemplate {
      * @param workbook       工作簿
      */
     public static void writeFile(String targetFilePath, Workbook workbook) {
-        try {
-            OutputStream outputStream = new FileOutputStream(targetFilePath);
+        try (OutputStream outputStream = new FileOutputStream(targetFilePath);) {
             workbook.write(outputStream);
         } catch (Exception ex) {
             throw new RuntimeException("输出文件异常", ex);
