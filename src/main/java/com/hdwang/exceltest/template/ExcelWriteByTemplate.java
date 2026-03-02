@@ -234,4 +234,45 @@ public class ExcelWriteByTemplate {
         }
         return index;
     }
+
+
+    /**
+     * 单元格位置
+     *
+     * @author Looly
+     * @since 5.1.4
+     */
+    private static class CellLocation implements Serializable {
+        private static final long serialVersionUID = 1L;
+
+        private int x;
+        private int y;
+
+        /**
+         * 构造
+         *
+         * @param x 列号，从0开始
+         * @param y 行号，从0开始
+         */
+        public CellLocation(int x, int y) {
+            this.x = x;
+            this.y = y;
+        }
+
+        public int getX() {
+            return x;
+        }
+
+        public void setX(int x) {
+            this.x = x;
+        }
+
+        public int getY() {
+            return y;
+        }
+
+        public void setY(int y) {
+            this.y = y;
+        }
+    }
 }
