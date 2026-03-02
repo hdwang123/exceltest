@@ -101,9 +101,10 @@ public class ExcelWriteByTemplate {
             Row row = sheet.getRow(cellLocation.getY());
             if (row != null) {
                 Cell cell = row.getCell(cellLocation.getX());
-                if (cell != null) {
-                    cell.setCellValue(value);
+                if (cell == null) {
+                    cell = row.createCell(cellLocation.getX());
                 }
+                cell.setCellValue(value);
             }
         });
     }
